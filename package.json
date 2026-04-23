@@ -1,0 +1,16 @@
+{
+  "name": "roguard-illegal-loan-landing",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "googleapis": "latest",
+    "next": "latest",
+    "posthog-js": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  }
+}
