@@ -64,7 +64,7 @@ const LANDING_HTML = `<header>
   <div class="container header-inner">
     <div class="logo-group">
       <div class="logo-text">
-        <div class="brand">RAWGUARD</div>
+        <div class="brand">LawGuard</div>
         <div class="tagline">매일법률사무소 · 불법사채 대응</div>
       </div>
     </div>
@@ -83,7 +83,7 @@ const LANDING_HTML = `<header>
       <div>
         <div class="eyebrow animate">
           <svg viewBox="0 0 24 24"><path d="M12 2L3 6v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V6l-9-4z"/></svg>
-          RAWGUARD × 매일법률사무소 · 불법사채 전담
+          LawGuard × 매일법률사무소 · 불법사채 전담
         </div>
         <h1 class="hero-title animate">
           멈춰야 할 건<br>
@@ -115,7 +115,7 @@ const LANDING_HTML = `<header>
 
       <div class="check-card animate">
         <div class="check-label">EMERGENCY CHECK</div>
-        <h3 class="check-title">현재 이런 상태라면,<br>RAWGUARD가 지켜드리겠습니다</h3>
+        <h3 class="check-title">현재 이런 상태라면,<br>LAWGUARD가 지켜드리겠습니다</h3>
         <ul class="check-list">
           <li class="check-item">
             <span class="check-mark"><svg viewBox="0 0 24 24" fill="none" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg></span>
@@ -209,7 +209,7 @@ const LANDING_HTML = `<header>
       </h2>
       <p class="section-sub">— 법률 전문가가 전략적으로 대응해야 합니다 —</p>
       <p class="extra">
-        RAWGUARD는 <strong>변호사가 직접 설계한 3가지 법적 무기</strong>를<br>
+       LawGuard 는 <strong>변호사가 직접 설계한 3가지 법적 무기</strong>를<br>
         피해자 상황에 맞춰 동시에 발동시킵니다.
       </p>
     </div>
@@ -241,7 +241,7 @@ const LANDING_HTML = `<header>
             <div class="weapon-box-title">수임 → 서면 통지 → 추심 중단</div>
             <div class="weapon-box-content">
               <ul>
-                <li>RAWGUARD 수임 → <strong>서면 통지 발송</strong></li>
+                <li>LawGuard 수임 → <strong>서면 통지 발송</strong></li>
                 <li>통지 다음 날부터 추심 중단</li>
                 <li>위반 시 과태료·형사 고소 병행</li>
                 <li>채권자와 직접 연락할 일 없음</li>
@@ -661,9 +661,9 @@ const LANDING_HTML = `<header>
       </div>
 
       <div class="faq-item">
-        <div class="faq-q">RAWGUARD는 진짜 변호사가 하는 건가요?</div>
+        <div class="faq-q">LawGuard는 진짜 변호사가 하는 건가요?</div>
         <div class="faq-a">
-          RAWGUARD는 <strong>매일법률사무소(대표변호사 김민석)</strong>가 운영하는 불법사채 전담 법률 서비스입니다. 상담·서류 검토·대응 전략 수립까지 모두 변호사가 직접 진행하며, 매일법률사무소 정식 사건으로 수임됩니다. "○○센터", "○○지원단" 같은 비변호사 업체와는 구조가 다릅니다.
+          LawGuard는 <strong>매일법률사무소(대표변호사 김민석)</strong>가 운영하는 불법사채 전담 법률 서비스입니다. 상담·서류 검토·대응 전략 수립까지 모두 변호사가 직접 진행하며, 매일법률사무소 정식 사건으로 수임됩니다. "○○센터", "○○지원단" 같은 비변호사 업체와는 구조가 다릅니다.
         </div>
         <div class="faq-law">📎 사업자등록번호 489-04-02780</div>
       </div>
@@ -704,7 +704,7 @@ const LANDING_HTML = `<header>
 <!-- ================= FOOTER CTA ================= -->
 <section class="footer-cta">
   <div class="container">
-    <div class="footer-ornament">— RAWGUARD × 매일법률사무소 —</div>
+    <div class="footer-ornament">— LawGuard × 매일법률사무소 —</div>
     <h2 class="footer-title">
       불법사채·불법추심 대응 상담
     </h2>
@@ -721,7 +721,7 @@ const LANDING_HTML = `<header>
       <a href="__KAKAO_LINK__" target="_blank" rel="noreferrer" class="btn-secondary js-kakao-cta" data-source="footer" style="padding: 20px 32px; font-size: 15.5px;">카카오톡 상담</a>
     </div>
     <div class="footer-meta">
-      © RAWGUARD. 본 페이지의 법률 정보는 일반적 안내이며, 구체적 상담은 변호사와 진행하시기 바랍니다.
+      © LawGuard. 본 페이지의 법률 정보는 일반적 안내이며, 구체적 상담은 변호사와 진행하시기 바랍니다.
     </div>
   </div>
 </section>
@@ -1171,7 +1171,7 @@ export default function Page() {
               <div>
                 <div className="lg-modal-head">
                   <div>
-                    <p className="lg-modal-eyebrow">RAWGUARD DIAGNOSIS</p>
+                    <p className="lg-modal-eyebrow">LAWGUARD DIAGNOSIS</p>
                     <h3 className="lg-modal-title">피해상황 1분 진단</h3>
                   </div>
                   <div className="lg-modal-step">{step -1} / 7</div>
