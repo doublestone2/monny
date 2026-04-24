@@ -1,5 +1,5 @@
 {
-  "name": "roguard-illegal-loan-landing",
+  "name": "roguard-illegal-loan-next",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -7,10 +7,10 @@
     "start": "next start"
   },
   "dependencies": {
-    "googleapis": "latest",
-    "next": "latest",
-    "posthog-js": "latest",
-    "react": "latest",
-    "react-dom": "latest"
+    "googleapis": "^144.0.0",
+    "next": "^15.3.1",
+    "posthog-js": "^1.239.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   }
 }

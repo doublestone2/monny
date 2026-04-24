@@ -1,26 +1,24 @@
-# 로가드 불법사채 랜딩페이지 (Next.js)
+# Roguard Illegal Loan Landing (Next.js)
 
-## 1. 설치
+## 시작
 ```bash
 npm install
-```
-
-## 2. 환경변수 설정
-`.env.example` 를 복사해서 `.env.local` 로 만든 뒤 값을 넣어주세요.
-
-## 3. 개발 서버 실행
-```bash
+cp .env.example .env.local
 npm run dev
 ```
 
-## 4. 구글시트 헤더
-Sheet1 1행에 아래 헤더를 먼저 만들어주세요.
+## 배포
+GitHub에 push 후 Vercel에서 import 하시면 됩니다.
 
-```text
-접수일시 | 이름 | 연락처 | 피해유형 | 추심강도 | 대여원금(만원) | 상환총액(만원) | 증거보유 | 주변인피해 | 추천조치 | 긴급도 | 요약 | 유입경로 | privacyAgreed
-```
+## 환경변수
+- NEXT_PUBLIC_POSTHOG_KEY
+- NEXT_PUBLIC_POSTHOG_HOST
+- NEXT_PUBLIC_KAKAO_LINK
+- NEXT_PUBLIC_LAWFIRM_LINK
+- NEXT_PUBLIC_NAVER_CAFE_LINK
+- GOOGLE_CLIENT_EMAIL
+- GOOGLE_PRIVATE_KEY
+- GOOGLE_SHEETS_ID
 
-## 5. Vercel 배포
-- GitHub에 push 후 Vercel에서 import
-- 또는 프로젝트 루트에서 `vercel --prod`
-- 배포 전 Vercel 프로젝트 환경변수에 `.env.local` 값과 같은 항목을 등록하세요.
+## 구글시트 헤더 권장
+접수일시 | 이름 | 연락처 | 피해유형 | 추심강도 | 대여원금(만원) | 상환총액(만원) | 증거보유 | 주변인피해 | 초과상환추정(만원) | 추천조치 | 긴급도 | 요약 | 유입경로 | privacyAgreed
