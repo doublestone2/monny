@@ -1,6 +1,13 @@
 import { google } from "googleapis";
 import { NextResponse } from "next/server";
 
+function toMultiline(value) {
+  if (Array.isArray(value)) {
+    return value.filter(Boolean).join("\n");
+  }
+  return value || "";
+}
+
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -14,15 +21,26 @@ export async function POST(req) {
     }
 
     const clientEmail = process.env.GOOGLE_CLIENT_EMAIL;
-    const privateKey = process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, "\n");
-    const spreadsheetId = process.env.GOOGLE_SHEETS_ID;
+    const privateKeyRaw = process.env.GOOGLE_PRIVATE_KEY;
+    const spreadsheetId = process.env.GOOGLE_SHEETS_SPREADSHEET_ID;
+    const sheetName = process.env.GOOGLE_SHEETS_SHEET_NAME || "Sheet1";
 
-    if (!clientEmail || !privateKey || !spreadsheetId) {
+    const missing = [];
+    if (!clientEmail) missing.push("GOOGLE_CLIENT_EMAIL");
+    if (!privateKeyRaw) missing.push("GOOGLE_PRIVATE_KEY");
+    if (!spreadsheetId) missing.push("GOOGLE_SHEETS_SPREADSHEET_ID");
+
+    if (missing.length > 0) {
       return NextResponse.json(
-        { ok: false, message: "Google Sheets 환경변수가 설정되지 않았습니다." },
+        {
+          ok: false,
+          message: `누락된 환경변수: ${missing.join(", ")}`,
+        },
         { status: 500 }
       );
     }
+
+    const privateKey = privateKeyRaw.replace(/\\n/g, "\n");
 
     const auth = new google.auth.JWT({
       email: clientEmail,
@@ -32,36 +50,36 @@ export async function POST(req) {
 
     const sheets = google.sheets({ version: "v4", auth });
 
+    // A ~ I 열까지만 저장
     const row = [
-      new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }),
-      applicant.name,
-      applicant.phone,
-      diagnosis?.damageType || "",
-      diagnosis?.pressureLevel || "",
-      diagnosis?.loanAmount || 0,
-      diagnosis?.repaidAmount || 0,
-      diagnosis?.evidence || "",
-      diagnosis?.spreadDamage || "",
-      diagnosis?.overpaidAmount || 0,
-      (diagnosis?.actionItems || []).join(", "),
-      diagnosis?.urgency || "",
-      diagnosis?.summary || "",
-      source || "unknown",
-      privacyAgreed ? "동의" : "미동의",
+      new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }), // A 접수일시
+      applicant.name || "",                                           // B 이름
+      applicant.phone || "",                                          // C 연락처
+      toMultiline(diagnosis?.pressureLevels),                         // D 추심강도
+      diagnosis?.loanAmount || 0,                                     // E 대여원금
+      diagnosis?.repaidAmount || 0,                                   // F 상환총액
+      toMultiline(diagnosis?.evidenceItems),                          // G 증거보유
+      diagnosis?.spreadDamage || "",                                  // H 주변인피해
     ];
 
     await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: "Sheet1!A:O",
+      range: `${sheetName}!A:I`,
       valueInputOption: "USER_ENTERED",
-      requestBody: { values: [row] },
+      requestBody: {
+        values: [row],
+      },
     });
 
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("consultation api error", error);
+
     return NextResponse.json(
-      { ok: false, message: "상담 접수 중 오류가 발생했습니다." },
+      {
+        ok: false,
+        message: error?.message || "상담 접수 중 오류가 발생했습니다.",
+      },
       { status: 500 }
     );
   }
