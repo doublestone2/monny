@@ -110,18 +110,28 @@ export async function POST(req) {
     // 구글시트 저장 성공 후 Meta CAPI 전송
     // CAPI 오류가 나도 상담신청 자체는 성공 처리
     try {
-      await sendMetaCapiEvent({
-        request: req,
-        eventId: eventId || `contact_${Date.now()}`,
-        eventName: "Contact",
-        phone,
-        email,
-        sourceUrl:
-          req.headers.get("referer") || process.env.NEXT_PUBLIC_SITE_URL,
-      });
-    } catch (capiError) {
-      console.error("Meta CAPI 전송 오류:", capiError);
-    }
+  console.log("Meta CAPI 호출 시작:", {
+    eventId: eventId || `contact_${Date.now()}`,
+    phone,
+    pixelId: process.env.NEXT_PUBLIC_META_PIXEL_ID,
+    hasToken: !!process.env.META_CAPI_ACCESS_TOKEN,
+    hasTestCode: !!process.env.META_CAPI_TEST_EVENT_CODE,
+  });
+
+  const capiResult = await sendMetaCapiEvent({
+    request: req,
+    eventId: eventId || `contact_${Date.now()}`,
+    eventName: "Contact",
+    phone,
+    email,
+    sourceUrl:
+      req.headers.get("referer") || process.env.NEXT_PUBLIC_SITE_URL,
+  });
+
+  console.log("Meta CAPI 결과:", capiResult);
+} catch (capiError) {
+  console.error("Meta CAPI 전송 오류:", capiError);
+}
 
     return NextResponse.json({
       ok: true,
