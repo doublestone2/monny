@@ -1,5 +1,9 @@
 import { google } from "googleapis";
 import { NextResponse } from "next/server";
+import { sendMetaCapiEvent } from "../../../lib/meta-capi";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 function toMultiline(value) {
   if (Array.isArray(value)) {
@@ -11,11 +15,29 @@ function toMultiline(value) {
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { applicant, diagnosis, privacyAgreed, source } = body || {};
 
-    if (!applicant?.name || !applicant?.phone) {
+    const {
+      applicant,
+      diagnosis,
+      privacyAgreed,
+      source,
+      eventId,
+    } = body || {};
+
+    const name = applicant?.name?.trim() || "";
+    const phone = applicant?.phone?.trim() || "";
+    const email = applicant?.email?.trim() || "";
+
+    if (!name || !phone) {
       return NextResponse.json(
         { ok: false, message: "이름과 연락처는 필수입니다." },
+        { status: 400 }
+      );
+    }
+
+    if (!privacyAgreed) {
+      return NextResponse.json(
+        { ok: false, message: "개인정보처리방침 동의가 필요합니다." },
         { status: 400 }
       );
     }
@@ -26,6 +48,7 @@ export async function POST(req) {
     const sheetName = process.env.GOOGLE_SHEETS_SHEET_NAME || "Sheet1";
 
     const missing = [];
+
     if (!clientEmail) missing.push("GOOGLE_CLIENT_EMAIL");
     if (!privateKeyRaw) missing.push("GOOGLE_PRIVATE_KEY");
     if (!spreadsheetId) missing.push("GOOGLE_SHEETS_SPREADSHEET_ID");
@@ -50,30 +73,62 @@ export async function POST(req) {
 
     const sheets = google.sheets({ version: "v4", auth });
 
-    // A ~ I 열까지만 저장
+    /**
+     * 불법사채 랜딩페이지 저장 컬럼
+     * A 접수일시
+     * B 이름
+     * C 연락처
+     * D 추심강도
+     * E 대여원금
+     * F 상환총액
+     * G 증거보유
+     * H 주변인피해
+     * I 유입소스
+     */
     const row = [
-      new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }), // A 접수일시
-      applicant.name || "",                                           // B 이름
-      applicant.phone || "",                                          // C 연락처
-      toMultiline(diagnosis?.pressureLevels),                         // D 추심강도
-      diagnosis?.loanAmount || 0,                                     // E 대여원금
-      diagnosis?.repaidAmount || 0,                                   // F 상환총액
-      toMultiline(diagnosis?.evidenceItems),                          // G 증거보유
-      diagnosis?.spreadDamage || "",                                  // H 주변인피해
+      new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }),
+      name,
+      phone,
+      toMultiline(diagnosis?.pressureLevels),
+      diagnosis?.loanAmount || 0,
+      diagnosis?.repaidAmount || 0,
+      toMultiline(diagnosis?.evidenceItems),
+      diagnosis?.spreadDamage || "",
+      source || "",
     ];
 
     await sheets.spreadsheets.values.append({
       spreadsheetId,
       range: `${sheetName}!A:I`,
       valueInputOption: "USER_ENTERED",
+      insertDataOption: "INSERT_ROWS",
       requestBody: {
         values: [row],
       },
     });
 
-    return NextResponse.json({ ok: true });
+    // 구글시트 저장 성공 후 Meta CAPI 전송
+    // CAPI 오류가 나도 상담신청 자체는 성공 처리
+    try {
+      await sendMetaCapiEvent({
+        request: req,
+        eventId: eventId || `contact_${Date.now()}`,
+        eventName: "Contact",
+        phone,
+        email,
+        sourceUrl:
+          req.headers.get("referer") || process.env.NEXT_PUBLIC_SITE_URL,
+      });
+    } catch (capiError) {
+      console.error("Meta CAPI 전송 오류:", capiError);
+    }
+
+    return NextResponse.json({
+      ok: true,
+      message: "상담신청이 정상적으로 접수되었습니다.",
+    });
   } catch (error) {
-    console.error("consultation api error", error);
+    console.error("consultation api error:", error);
 
     return NextResponse.json(
       {

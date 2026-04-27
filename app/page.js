@@ -1103,56 +1103,74 @@ export default function Page() {
     }
   };
 
-  const handleConsultSubmit = async (e) => {
-    e.preventDefault();
+ const handleConsultSubmit = async (e) => {
+  e.preventDefault();
 
-    if (!consultation.name.trim() || !consultation.phone.trim()) {
-      setSubmitMessage("이름과 연락처를 입력해주세요.");
-      return;
+  if (!consultation.name.trim() || !consultation.phone.trim()) {
+    setSubmitMessage("이름과 연락처를 입력해주세요.");
+    return;
+  }
+
+  if (!privacyAgreed) {
+    setSubmitMessage("개인정보처리방침에 동의해주세요.");
+    return;
+  }
+
+  try {
+    setIsSubmitting(true);
+    setSubmitMessage("");
+
+    const eventId =
+      typeof window !== "undefined" && window.crypto?.randomUUID
+        ? `contact_${window.crypto.randomUUID()}`
+        : `contact_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+
+    const response = await fetch("/api/consultation", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        eventId,
+        applicant: consultation,
+        privacyAgreed,
+        diagnosis,
+        source: diagnosisSourceRef.current,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.message || "상담 신청 전송에 실패했습니다.");
     }
 
-    if (!privacyAgreed) {
-      setSubmitMessage("개인정보처리방침에 동의해주세요.");
-      return;
+    // 구글시트 저장 성공 후 브라우저 Pixel Contact 이벤트 전송
+    if (typeof window !== "undefined" && typeof window.fbq === "function") {
+      window.fbq("track", "Contact", {}, { eventID: eventId });
     }
 
-    try {
-      setIsSubmitting(true);
-      setSubmitMessage("");
-
-      const response = await fetch("/api/consultation", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          applicant: consultation,
-          privacyAgreed,
-          diagnosis,
-          source: diagnosisSourceRef.current,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok || !data.ok) {
-        throw new Error(data.message || "상담 신청 전송에 실패했습니다.");
-      }
-
+    // 기존 분석도구 사용 중이면 유지
+    if (typeof safeCapture === "function") {
       safeCapture("consultation submitted", {
         source: "illegal_loan_result",
         diagnosis_source: diagnosisSourceRef.current,
-        urgency: diagnosis.urgency,
+        urgency: diagnosis?.urgency,
+        event_id: eventId,
       });
-
-      setSubmitMessage("상담 신청이 정상적으로 접수되었습니다.");
-      setConsultation({ name: "", phone: "" });
-      setPrivacyAgreed(false);
-      setPrivacyOpen(false);
-    } catch (error) {
-      setSubmitMessage(error.message || "신청 전송 중 오류가 발생했습니다.");
-    } finally {
-      setIsSubmitting(false);
     }
-  };
+
+    setSubmitMessage("상담 신청이 정상적으로 접수되었습니다.");
+    setConsultation({ name: "", phone: "" });
+    setPrivacyAgreed(false);
+    setPrivacyOpen(false);
+  } catch (error) {
+    console.error("상담신청 전송 오류:", error);
+    setSubmitMessage(error.message || "신청 전송 중 오류가 발생했습니다.");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   return (
     <>
