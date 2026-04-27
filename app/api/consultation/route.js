@@ -20,7 +20,6 @@ export async function POST(req) {
       applicant,
       diagnosis,
       privacyAgreed,
-      source,
       eventId,
     } = body || {};
 
@@ -83,7 +82,6 @@ export async function POST(req) {
      * F 상환총액
      * G 증거보유
      * H 주변인피해
-     * I 유입소스
      */
     const row = [
       new Date().toLocaleString("ko-KR", { timeZone: "Asia/Seoul" }),
@@ -94,12 +92,11 @@ export async function POST(req) {
       diagnosis?.repaidAmount || 0,
       toMultiline(diagnosis?.evidenceItems),
       diagnosis?.spreadDamage || "",
-      source || "",
     ];
 
     await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: `${sheetName}!A:I`,
+      range: `${sheetName}!A:H`,
       valueInputOption: "USER_ENTERED",
       insertDataOption: "INSERT_ROWS",
       requestBody: {
@@ -110,28 +107,28 @@ export async function POST(req) {
     // 구글시트 저장 성공 후 Meta CAPI 전송
     // CAPI 오류가 나도 상담신청 자체는 성공 처리
     try {
-  console.log("Meta CAPI 호출 시작:", {
-    eventId: eventId || `contact_${Date.now()}`,
-    phone,
-    pixelId: process.env.NEXT_PUBLIC_META_PIXEL_ID,
-    hasToken: !!process.env.META_CAPI_ACCESS_TOKEN,
-    hasTestCode: !!process.env.META_CAPI_TEST_EVENT_CODE,
-  });
+      console.log("Meta CAPI 호출 시작:", {
+        eventId: eventId || `contact_${Date.now()}`,
+        phone,
+        pixelId: process.env.NEXT_PUBLIC_META_PIXEL_ID,
+        hasToken: !!process.env.META_CAPI_ACCESS_TOKEN,
+        hasTestCode: !!process.env.META_CAPI_TEST_EVENT_CODE,
+      });
 
-  const capiResult = await sendMetaCapiEvent({
-    request: req,
-    eventId: eventId || `contact_${Date.now()}`,
-    eventName: "Contact",
-    phone,
-    email,
-    sourceUrl:
-      req.headers.get("referer") || process.env.NEXT_PUBLIC_SITE_URL,
-  });
+      const capiResult = await sendMetaCapiEvent({
+        request: req,
+        eventId: eventId || `contact_${Date.now()}`,
+        eventName: "Contact",
+        phone,
+        email,
+        sourceUrl:
+          req.headers.get("referer") || process.env.NEXT_PUBLIC_SITE_URL,
+      });
 
-  console.log("Meta CAPI 결과:", capiResult);
-} catch (capiError) {
-  console.error("Meta CAPI 전송 오류:", capiError);
-}
+      console.log("Meta CAPI 결과:", capiResult);
+    } catch (capiError) {
+      console.error("Meta CAPI 전송 오류:", capiError);
+    }
 
     return NextResponse.json({
       ok: true,
